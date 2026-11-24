@@ -1,0 +1,21 @@
+# API 키 및 비밀 설정 (절대 Git에 커밋하지 마세요)
+.env
+.streamlit/secrets.toml
+*비번*.txt
+*password*.txt
+*secret*.txt
+supabase*.txt
+
+# 로컬 SQLite 테스트 DB 및 임시 파일
+data/*.db
+data/*.db-journal
+data/*.db-wal
+data/*.db-shm
+
+# Python 캐시 및 가상환경
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.DS_Store
+Thumbs.db
