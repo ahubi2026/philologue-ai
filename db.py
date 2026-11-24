@@ -87,6 +87,7 @@ def get_conn():
             "row_factory": dict_row,
             # Supabase PgBouncer Transaction Pooler(6543) 호환을 위해 prepared statement 비활성화
             "prepare_threshold": None,
+            "connect_timeout": 10,
         }
         if "sslmode=" not in url and "localhost" not in url and "127.0.0.1" not in url:
             connect_kwargs["sslmode"] = "require"
