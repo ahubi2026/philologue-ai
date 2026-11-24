@@ -10,6 +10,7 @@ import os
 import re
 import secrets
 import sqlite3
+import threading
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 
@@ -17,6 +18,7 @@ import config
 
 DB_PATH = config.DB_PATH
 _INITIALIZED_TARGETS: set[tuple[str, str]] = set()
+_INIT_LOCK = threading.Lock()
 
 
 def _normalized_pg_url() -> str:
@@ -121,8 +123,17 @@ def init_db(force: bool = False) -> None:
     if not force and target_key in _INITIALIZED_TARGETS:
         return
 
+    with _INIT_LOCK:
+        if not force and target_key in _INITIALIZED_TARGETS:
+            return
+        _run_init_ddl()
+        _INITIALIZED_TARGETS.add(target_key)
+
+
+def _run_init_ddl() -> None:
     if is_postgres():
         pg_ddl = [
+            "SELECT pg_advisory_xact_lock(73910421)",
             """
             CREATE TABLE IF NOT EXISTS users (
                 id            SERIAL PRIMARY KEY,
@@ -267,8 +278,6 @@ def init_db(force: bool = False) -> None:
             _ensure_column_sqlite(conn, "reflections", "question_id", "TEXT NOT NULL DEFAULT ''")
             _ensure_column_sqlite(conn, "reflections", "changed_mind", "TEXT NOT NULL DEFAULT ''")
             _ensure_column_sqlite(conn, "reflections", "discussion_question", "TEXT NOT NULL DEFAULT ''")
-
-    _INITIALIZED_TARGETS.add(target_key)
 
 
 # ---------- 비밀번호 처리 ----------
